@@ -15,7 +15,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from . import main
 from biblat_manager.webapp import babel, controllers
 from biblat_manager.webapp.forms import (
-    RegistrationForm, LoginForm, EmailForm, PasswordForm
+    RegistrationForm, LoginForm, EmailForm, PasswordForm, FasciculoForm
 )
 from biblat_manager.webapp.models import User
 from biblat_manager.webapp.utils import get_timed_serializer
@@ -301,3 +301,30 @@ def reset_with_token(token):
     }
     return render_template('auth/reset_with_token.html', **data)
 
+
+@main.route('/fasciculos/agregar', methods=['GET', 'POST'])
+@register_breadcrumb(main, '.fasciculos', __('Fasciculos'))
+@login_required
+def fasciculos():
+    form = FasciculoForm()
+    return render_template('forms/fasciculo.html', form=form)
+
+
+class BiblatSchemaAdminView(mongoengine.ModelView):
+    page_size = 20
+    can_create = False
+    can_edit = False
+    can_delete = False
+    create_modal = True
+    edit_modal = True
+    can_view_details = True
+
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+
+class UserAdminView(BiblatSchemaAdminView):
+    can_create = True
+    can_edit = True
+    can_delete = False
+    page_size = 30
